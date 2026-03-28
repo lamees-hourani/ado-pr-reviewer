@@ -245,6 +245,148 @@ The author will be notified.
 
 ---
 
+---
+
+## Pre-Post Comment Review Mode
+
+Before posting any comment to the PR, the user can choose how they want to review them first. 
+**Always ask the user at the start of the review:**
+
+```
+How would you like to review comments before I post them?
+
+  A) Bulk checklist — I'll show you all comments at once as a numbered list.
+     You tick ✅ the ones to post and ✗ the ones to skip, then I post them all.
+
+  B) One by one — I'll show you each comment individually and wait for your
+     approval before moving to the next one.
+
+  C) Post all automatically — Skip review, post everything directly.
+
+Reply A, B, or C.
+```
+
+### Mode A — Bulk Checklist
+
+After analysis, present ALL findings as a numbered checklist before posting anything:
+
+```
+📋 Review complete — here are all the comments I found for PR #<id>:
+
+ #  | File & Line                                      | Issue
+----|--------------------------------------------------|---------------------------
+ 1  | ClaimTests.cs : 10                               | typo — TpsFramwork ==> TpsFramework
+ 2  | ClaimTests.cs : 52                               | use ShouldNotBe not Assert.NotEqual
+ 3  | ClaimsRepositoryTests.cs : 19                    | PartyId ==> partyId
+ 4  | ClaimsRepositoryTests.cs : 232                   | use [] instead of new() { }
+ 5  | DependsOnAttribute.cs : 1                        | DependsOn should not be in UnitTests
+ 6  | MockNafathCacheService.cs : 1                    | 🔴 mock boundary leak
+ 7  | TpsTestBaseWIthDbCleaner.cs : 1                  | WIth ==> With
+ 8  | ⚠️ Work Item #194002                              | No linked work item found
+
+Which comments do you want me to post?
+Reply with numbers separated by commas (e.g. "1,2,4,7"), "all", or "none".
+```
+
+Wait for the user's reply, then post only the selected comments.
+
+### Mode B — One by One
+
+Show each comment individually and wait for approval before the next:
+
+```
+Comment 1 of 8:
+
+📄 File: ClaimTests.cs — Line 10
+──────────────────────────────────
+typo — `TpsFramwork` ==> `TpsFramework`
+
+💡 Find and replace all usages of this alias name.
+
+Post this comment? [YES / skip / stop]
+```
+
+- **YES** → post it, move to next
+- **skip** → skip it silently, move to next
+- **stop** → stop the whole review, don't post anything further
+
+### Mode C — Automatic (default if user says "just post everything")
+
+Skip the review step entirely. Post all comments immediately as found.
+
+---
+
+---
+
+## Precise Comment Positioning
+
+Every inline comment MUST be anchored to the exact location in the file.
+Use all four positioning fields — never leave offsets as 1/1 unless the issue truly spans the whole line.
+
+### Required fields for every inline comment
+
+```
+filePath:              /path/to/file.cs          ← full path from repo root
+rightFileStartLine:    <line number>              ← 1-based, first line of the issue
+rightFileEndLine:      <line number>              ← same as start for single-line
+rightFileStartOffset:  <char position>            ← 1-based char offset where issue starts
+rightFileEndOffset:    <char position>            ← char offset where issue ends
+```
+
+### How to calculate offsets
+
+When you read file contents via `ado:search_code`, count characters from the start of the line:
+
+```
+Line 19: "        Guid PartyId = existingParty?.Id ?? Guid.Parse(..."
+         123456789012345678901234
+                   ^             ^
+                   offset 9      offset 21 → "Guid PartyId"
+```
+
+So the comment for "PartyId ==> partyId" would be:
+```
+rightFileStartLine:   19
+rightFileEndLine:     19
+rightFileStartOffset: 14    ← start of "PartyId"
+rightFileEndOffset:   20    ← end of "PartyId"
+```
+
+### Positioning rules by issue type
+
+| Issue type | How to position |
+|-----------|----------------|
+| **Rename / typo** | Highlight the exact wrong word — start/end offsets wrap the bad identifier |
+| **Missing blank line** | Point to the line after the `}` — offset 1 to end of line |
+| **Wrong keyword** (`var`, `!=`) | Highlight the exact keyword |
+| **File-scope namespace** | Line 1, full line (offset 1 to end) |
+| **Entire file issue** (naming, structure) | Line 1, offset 1 to end of first line |
+| **Multi-line block** | Set startLine/endLine to span the full block |
+| **Specific method call** | Highlight just the method name, not the full call |
+| **Work item summary** | No file/line — PR-level comment (omit all position fields) |
+
+### Example: Highlighting a specific method name
+
+```python
+# Code: line 63 reads: "    var result = await _repo.GetClaimsAsync(request);"
+# Issue: don't use var
+
+rightFileStartLine:   63
+rightFileEndLine:     63
+rightFileStartOffset: 5     ← "var" starts at col 5
+rightFileEndOffset:   7     ← "var" ends at col 7
+```
+
+### Offset counting tips
+
+- Count from **1**, not 0
+- **Spaces count** — leading whitespace is part of the offset
+- **Tabs count as 1** character each
+- If you cannot determine exact offsets from the code snippet, use offset 1 to end-of-identifier as a safe fallback — but always try to be precise
+- For a whole-line issue, use offset 1 to the length of the line content
+
+---
+
 ## Comment Format (MUST follow for every comment)
 
 Every inline comment must use this two-part structure:

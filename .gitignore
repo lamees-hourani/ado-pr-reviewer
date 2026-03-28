@@ -1,0 +1,12 @@
+# Keep PUBLISHING.md local — it contains internal notes not needed in the public repo
+PUBLISHING.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+PUBLISHING.md

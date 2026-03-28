@@ -61,13 +61,13 @@ Replace `<your-org>` with your Azure DevOps organization name (found in your URL
 
 **Via Claude Code plugin (recommended):**
 ```bash
-/plugin install ado-pr-reviewer@lamees-hourany
+/plugin install ado-pr-reviewer@lamees-hourani
 ```
 
 **Manual install:**
 ```bash
 # Clone and copy to your skills folder
-git clone https://github.com/lamees-hourany/ado-pr-reviewer
+git clone https://github.com/lamees-hourani/ado-pr-reviewer
 cp -r ado-pr-reviewer ~/.claude/skills/ado-pr-reviewer
 ```
 
@@ -163,4 +163,4 @@ Apache 2.0 — see [LICENSE](./LICENSE)
 
 PRs welcome! If you add support for new language rules, security checks, or ADO-specific patterns, please open a pull request.
 
-Issues and feature requests: [github.com/lamees-hourany/ado-pr-reviewer/issues](https://github.com/lamees-hourany/ado-pr-reviewer/issues)
+Issues and feature requests: [github.com/lamees-hourani/ado-pr-reviewer/issues](https://github.com/lamees-hourani/ado-pr-reviewer/issues)
