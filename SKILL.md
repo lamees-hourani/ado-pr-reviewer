@@ -72,15 +72,68 @@ Use the returned names and GUIDs to fill in the setup section above.
 
 ---
 
-### 2. Fetch Open PRs
+### 2. Fetch PRs Assigned to You as Reviewer
+
+Only fetch PRs where the current user is a reviewer:
 
 ```
 ado:repo_list_pull_requests_by_repo_or_project
   project: <YOUR_PROJECT>
   status: Active
+  i_am_reviewer: true
 ```
 
-If the user specifies a PR number, skip to step 3.
+If no PRs are returned, inform the user:
+```
+No open PRs are currently assigned to you as a reviewer.
+```
+
+If the user specifies a PR number directly, skip to step 2.5.
+
+### 2.5. Pre-Flight Checks (run before reviewing each PR)
+
+For each PR returned, do ALL of the following checks before proceeding:
+
+#### A — Already reviewed by you?
+
+Fetch existing threads on the PR:
+
+```
+ado:repo_list_pull_request_threads
+  pullRequestId: <id>
+  repositoryId: <repo GUID>
+  project: <YOUR_PROJECT>
+```
+
+Scan the threads for any comments already posted by the current user (match by author display name or email).
+
+**If you have already posted comments on this PR**, show the user:
+```
+⚠️ PR #<id> — "<title>"
+You have already reviewed this PR (found <N> existing comment threads from you).
+
+Options:
+  A) Re-review — I will skip any lines that already have your comments
+  B) Skip this PR — move to the next one
+  C) Review anyway — post all comments including potential duplicates
+
+Reply A, B, or C.
+```
+Wait for user's choice before continuing.
+
+#### B — Duplicate line check (applied during step 6)
+
+Before posting ANY comment, load the existing threads (fetched above) and build a **"already commented" index**:
+
+```
+alreadyCommented = Set of (filePath + ":" + lineNumber)
+  for each existing thread where author == currentUser
+    add thread.filePath + ":" + thread.rightFileStartLine
+```
+
+When about to post a comment at `filePath:line`:
+- If already in `alreadyCommented` → **SKIP — do not post duplicate**
+- If not in index → post normally
 
 ---
 
