@@ -2,7 +2,7 @@
   "name": "ado-pr-reviewer",
   "version": "1.0.0",
   "description": "AI-powered Azure DevOps PR reviewer. Posts inline comments, verifies work items, checks security/performance/logic issues, and votes on PRs — all from Claude Desktop.",
-  "author": "Lamees Hourany / Tech Process Solutions (TPS)",
+  "author": "Lamees Hourani",
   "license": "Apache-2.0",
   "skills": [
     {
